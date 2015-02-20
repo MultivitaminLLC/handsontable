@@ -53,8 +53,9 @@ function contentLoaded(win, fn) {
 }
 
 
-function ajax (url, method, callback, params) {
+function ajax(url, method, params, callback) {
   var obj;
+
   try {
     obj = new XMLHttpRequest();
   } catch (e) {
@@ -70,15 +71,17 @@ function ajax (url, method, callback, params) {
     }
   }
   obj.onreadystatechange = function () {
-
     if (obj.readyState == 4) {
       callback(obj);
     }
   };
   obj.open(method, url, true);
+  obj.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+  obj.setRequestHeader("Content-type","application/x-www-form-urlencoded");
   obj.send(params);
+
   return obj;
-};
+}
 
 (function () {
 
@@ -311,7 +314,7 @@ function ajax (url, method, callback, params) {
       }
     }
 
-    footer.innerHTML = 'Handsontable &copy; 2012-2014 Nextgen. Contact us at <a href="mailto:' + link + '">'+ link +'</a>.<br> Code and documentation licensed under the The MIT License.';
+    footer.innerHTML = 'Handsontable &copy; 2012-' + new Date().getFullYear() + ' Nextgen. Contact us at <a href="mailto:' + link + '">'+ link +'</a>.<br> Code and documentation licensed under the The MIT License.';
 
   }
 
@@ -393,7 +396,7 @@ function ajax (url, method, callback, params) {
       bindMenuEvents(menu)
     }
     else {
-      ajax("../index.html", 'GET', onMenuLoad);
+      ajax("../index.html", 'GET', '', onMenuLoad);
     }
 
   }

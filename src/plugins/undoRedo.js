@@ -60,6 +60,11 @@
       var action = new Handsontable.UndoRedo.RemoveColumnAction(index, removedData, headers);
       plugin.done(action);
     });
+
+    instance.addHook("beforeCellAlignment", function (stateBefore, range, type, alignment) {
+      var action = new Handsontable.UndoRedo.CellAlignmentAction(stateBefore, range, type, alignment);
+      plugin.done(action);
+    });
   };
 
   Handsontable.UndoRedo.prototype.done = function (action) {
@@ -156,20 +161,20 @@
     instance.setDataAtRowProp(data, null, null, 'undo');
 
     for (var i = 0, len = data.length; i < len; i++) {
-     if(instance.getSettings().minSpareRows &&
-      data[i][0] + 1 + instance.getSettings().minSpareRows === instance.countRows()
-      && emptyRowsAtTheEnd == instance.getSettings().minSpareRows) {
-        instance.alter('remove_row', parseInt(data[i][0]+1,10), instance.getSettings().minSpareRows);
+     if (instance.getSettings().minSpareRows &&
+        data[i][0] + 1 + instance.getSettings().minSpareRows === instance.countRows() &&
+        emptyRowsAtTheEnd == instance.getSettings().minSpareRows) {
 
-        instance.undoRedo.doneActions.pop();
+       instance.alter('remove_row', parseInt(data[i][0]+1,10), instance.getSettings().minSpareRows);
+       instance.undoRedo.doneActions.pop();
 
-      }
+     }
 
-      if (instance.getSettings().minSpareCols &&
-      data[i][1] + 1 + instance.getSettings().minSpareCols === instance.countCols()
-      && emptyColsAtTheEnd == instance.getSettings().minSpareCols) {
+     if (instance.getSettings().minSpareCols &&
+        data[i][1] + 1 + instance.getSettings().minSpareCols === instance.countCols() &&
+        emptyColsAtTheEnd == instance.getSettings().minSpareCols) {
+
         instance.alter('remove_col', parseInt(data[i][1]+1,10), instance.getSettings().minSpareCols);
-
         instance.undoRedo.doneActions.pop();
       }
     }
@@ -194,6 +199,12 @@
   };
   Handsontable.helper.inherit(Handsontable.UndoRedo.CreateRowAction, Handsontable.UndoRedo.Action);
   Handsontable.UndoRedo.CreateRowAction.prototype.undo = function (instance, undoneCallback) {
+    var rowCount = instance.countRows(),
+      minSpareRows = instance.getSettings().minSpareRows;
+    if(this.index >= rowCount && this.index - minSpareRows < rowCount) {
+      this.index -= minSpareRows; // work around the situation where the needed row was removed due to an 'undo' of a made change
+    }
+
     instance.addHookOnce('afterRemoveRow', undoneCallback);
     instance.alter('remove_row', this.index, this.amount);
   };
@@ -233,6 +244,41 @@
   Handsontable.UndoRedo.CreateColumnAction.prototype.redo = function (instance, redoneCallback) {
     instance.addHookOnce('afterCreateCol', redoneCallback);
     instance.alter('insert_col', this.index + 1, this.amount);
+  };
+
+  Handsontable.UndoRedo.CellAlignmentAction = function (stateBefore, range, type, alignment) {
+    this.stateBefore = stateBefore;
+    this.range = range;
+    this.type = type;
+    this.alignment = alignment;
+  };
+  Handsontable.UndoRedo.CellAlignmentAction.prototype.undo = function(instance, undoneCallback) {
+    if (!instance.contextMenu) {
+      return;
+    }
+
+    for (var row = this.range.from.row; row <= this.range.to.row; row++) {
+      for (var col = this.range.from.col; col <= this.range.to.col; col++) {
+        instance.setCellMeta(row, col, 'className', this.stateBefore[row][col] || ' htLeft');
+      }
+    }
+
+    instance.addHookOnce('afterRender', undoneCallback);
+    instance.render();
+  };
+  Handsontable.UndoRedo.CellAlignmentAction.prototype.redo = function(instance, undoneCallback) {
+    if (!instance.contextMenu) {
+      return;
+    }
+
+    for (var row = this.range.from.row; row <= this.range.to.row; row++) {
+      for (var col = this.range.from.col; col <= this.range.to.col; col++) {
+        instance.contextMenu.align.call(instance, this.range, this.type, this.alignment);
+      }
+    }
+
+    instance.addHookOnce('afterRender', undoneCallback);
+    instance.render();
   };
 
   Handsontable.UndoRedo.RemoveColumnAction = function (index, data, headers) {

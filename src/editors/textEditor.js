@@ -14,7 +14,7 @@
   };
 
   TextEditor.prototype.getValue = function(){
-    return this.TEXTAREA.value
+    return this.TEXTAREA.value;
   };
 
   TextEditor.prototype.setValue = function(newValue){
@@ -22,13 +22,12 @@
   };
 
   var onBeforeKeyDown =  function onBeforeKeyDown(event){
+    var instance = this,
+      that = instance.getActiveEditor(),
+      keyCodes, ctrlDown;
 
-    var instance = this;
-    var that = instance.getActiveEditor();
-
-    var keyCodes = Handsontable.helper.keyCode;
-    var ctrlDown = (event.ctrlKey || event.metaKey) && !event.altKey; //catch CTRL but not right ALT (which in some systems triggers ALT+CTRL)
-
+    keyCodes = Handsontable.helper.keyCode;
+    ctrlDown = (event.ctrlKey || event.metaKey) && !event.altKey; //catch CTRL but not right ALT (which in some systems triggers ALT+CTRL)
     Handsontable.Dom.enableImmediatePropagation(event);
 
     //Process only events that have been fired in the editor
@@ -60,10 +59,17 @@
         var isMultipleSelection = !(selected[0] === selected[2] && selected[1] === selected[3]);
         if ((ctrlDown && !isMultipleSelection) || event.altKey) { //if ctrl+enter or alt+enter, add new line
           if(that.isOpened()){
-            that.setValue(that.getValue() + '\n');
-            that.focus();
+            var caretPosition = Handsontable.Dom.getCaretPosition(that.TEXTAREA),
+                value = that.getValue();
+
+            var newValue = value.slice(0, caretPosition) + '\n' + value.slice(caretPosition);
+
+            that.setValue(newValue);
+
+            Handsontable.Dom.setCaretPosition(that.TEXTAREA, caretPosition + 1);
+
           } else {
-            that.beginEditing(that.originalValue + '\n')
+            that.beginEditing(that.originalValue + '\n');
           }
           event.stopImmediatePropagation();
         }
@@ -236,6 +242,10 @@
     if (colHeadersCount > 0 && parseInt(this.TD.style.borderLeftWidth, 10) > 0) {
       editLeft += 1;
     }
+    if(rowHeadersCount && this.instance.getSelected()[0] === 0) {
+      editTop += 1;
+    }
+
 
 
     if(cssTransformOffset && cssTransformOffset != -1) {
@@ -243,6 +253,8 @@
     } else {
       Handsontable.Dom.resetCssTransform(this.textareaParentStyle);
     }
+
+
 
     this.textareaParentStyle.top = editTop + 'px';
     this.textareaParentStyle.left = editLeft + 'px';
@@ -295,6 +307,16 @@
 
     this.instance.addHook('afterScrollVertically', function () {
       editor.refreshDimensions();
+    });
+
+    this.instance.addHook('afterColumnResize', function () {
+      editor.refreshDimensions();
+      editor.focus();
+    });
+
+    this.instance.addHook('afterRowResize', function () {
+      editor.refreshDimensions();
+      editor.focus();
     });
 
     this.instance.addHook('afterDestroy', function () {
