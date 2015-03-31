@@ -58,6 +58,43 @@ Handsontable.Dom.isChildOf = function (child, parent) {
 };
 
 /**
+ * Check if an element is part of `hot-table` web component.
+ *
+ * @param {Element} element
+ * @returns {Boolean}
+ */
+Handsontable.Dom.isChildOfWebComponentTable = function(element) {
+  var hotTableName = 'hot-table',
+    result = false,
+    parentNode;
+
+  // Wrap element into polymer/webcomponent container if exists
+  parentNode = typeof wrap === 'undefined' ? element : wrap(element);
+
+  function isHotTable(element) {
+    return element.nodeType === Node.ELEMENT_NODE && element.nodeName === hotTableName.toUpperCase();
+  }
+
+  while (parentNode != null) {
+    if (isHotTable(parentNode)) {
+      result = true;
+      break;
+    }
+    else if (parentNode.host && parentNode.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+      result = isHotTable(parentNode.host);
+
+      if (result) {
+        break;
+      }
+      parentNode = parentNode.host;
+    }
+    parentNode = parentNode.parentNode;
+  }
+
+  return result;
+};
+
+/**
  * Counts index of element within its parent
  * WARNING: for performance reasons, assumes there are only element nodes (no text nodes). This is true for Walkotnable
  * Otherwise would need to check for nodeType or use previousElementSibling
@@ -205,19 +242,15 @@ Handsontable.Dom.isVisible = function (elem) {
   var next = elem;
 
   function extractElement(element) {
-    /* global ShadowDOMPolyfill */
-    if (typeof ShadowDOMPolyfill !== 'undefined' && ShadowDOMPolyfill.unwrapIfNeeded) {
-      return ShadowDOMPolyfill.unwrapIfNeeded(element);
-    }
-
-    return element;
+    // Wrap element into polymer/webcomponent container if exists
+    return typeof unwrap === 'undefined' ? element : unwrap(element);
   }
 
   while (extractElement(next) !== document.documentElement) { //until <html> reached
     if (next === null) { //parent detached from DOM
       return false;
     }
-    else if (next.nodeType === 11) {  //nodeType == 1 -> DOCUMENT_FRAGMENT_NODE
+    else if (next.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
       if (next.host) { //this is Web Components Shadow DOM
         //see: http://w3c.github.io/webcomponents/spec/shadow/#encapsulation
         //according to spec, should be if (next.ownerDocument !== window.document), but that doesn't work yet
@@ -240,6 +273,7 @@ Handsontable.Dom.isVisible = function (elem) {
     }
     next = next.parentNode;
   }
+
   return true;
 };
 

@@ -31,7 +31,8 @@ Handsontable.eventManager = function (instance) {
     var callbackProxy;
 
     callbackProxy = function callbackProxy(event) {
-      var newEvent;
+      var isHotTableSpotted = false,
+        target, len;
 
       if (event.target == void 0 && event.srcElement != void 0) {
         if (event.definePoperty) {
@@ -55,34 +56,38 @@ Handsontable.eventManager = function (instance) {
           };
         }
       }
-      event.realTarget = event.target;
       event.isTargetWebComponent = false;
 
-      if (Handsontable.helper.isWebComponent(event.target)) {
+      if (Handsontable.eventManager.isHotTableEnv) {
+        event = typeof wrap === 'undefined' ? event : wrap(event);
+        len = event.path ? event.path.length : 0;
+
+        while (len --) {
+          if (event.path[len].nodeName === 'HOT-TABLE') {
+            isHotTableSpotted = true;
+
+          } else if (isHotTableSpotted && event.path[len].shadowRoot) {
+            target = event.path[len];
+          }
+          if (len === 0 && !target) {
+            target = event.path[len];
+          }
+        }
+        if (!target) {
+          target = event.target;
+        }
         event.isTargetWebComponent = true;
 
-        newEvent = Object.create(event, {
-          target: {
-            value: event.path[0]
+        Object.defineProperty(event, 'target', {
+          get: function() {
+            // Wrap element into polymer/webcomponent container if exists
+            return typeof wrap === 'undefined' ? target : wrap(target);
           },
-          constructor: {
-            value: event.constructor
-          }
+          enumerable: true,
+          configurable: true
         });
-        newEvent.preventDefault = function() {
-          event.preventDefault.apply(event, arguments);
-        };
-        newEvent.stopPropagation = function() {
-          event.stopPropagation.apply(event, arguments);
-        };
-        newEvent.stopImmediatePropagation = function() {
-          event.stopImmediatePropagation.apply(event, arguments);
-        };
-        callback.call(this, newEvent);
       }
-      else {
-        callback.call(this, event);
-      }
+      callback.call(this, event);
     };
 
     instance.eventListeners.push({
