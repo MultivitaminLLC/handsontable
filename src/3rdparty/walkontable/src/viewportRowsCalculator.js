@@ -24,10 +24,13 @@ function WalkontableViewportRowsCalculator(height, scrollOffset, totalRows, rowH
   this.startPosition = null;
   this.endRow = null;
   this.count = 0;
+
+  height = Infinity;
+
   var sum = 0;
   var rowHeight;
   var needReverse = true;
-  var defaultRowHeight = 23;
+  var defaultRowHeight = 20;
   var startPositions = [];
   for (var i = 0; i < totalRows; i++) {
     rowHeight = rowHeightFn(i);

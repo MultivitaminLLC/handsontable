@@ -7,7 +7,7 @@
  * Licensed under the MIT license.
  * http://handsontable.com/
  *
- * Date: Thu Mar 19 2015 15:05:12 GMT+0100 (CET)
+ * Date: Tue Aug 23 2016 14:46:01 GMT+0500 (YEKT)
  */
 /*jslint white: true, browser: true, plusplus: true, indent: 4, maxerr: 50 */
 
@@ -22378,6 +22378,7 @@ function WalkontableViewportColumnsCalculator (width, scrollOffset, totalColumns
   this.needVerifyLastColumnWidth = true;
   this.stretchAllColumnsWidth = [];
 
+  width = Infinity;
 
   function getStretchedAllColumnWidth(column, baseWidth) {
     var sumRatioWidth = 0;
@@ -22547,10 +22548,13 @@ function WalkontableViewportRowsCalculator(height, scrollOffset, totalRows, rowH
   this.startPosition = null;
   this.endRow = null;
   this.count = 0;
+
+  height = Infinity;
+
   var sum = 0;
   var rowHeight;
   var needReverse = true;
-  var defaultRowHeight = 23;
+  var defaultRowHeight = 20;
   var startPositions = [];
   for (var i = 0; i < totalRows; i++) {
     rowHeight = rowHeightFn(i);

@@ -21,6 +21,7 @@ function WalkontableViewportColumnsCalculator (width, scrollOffset, totalColumns
   this.needVerifyLastColumnWidth = true;
   this.stretchAllColumnsWidth = [];
 
+  width = Infinity;
 
   function getStretchedAllColumnWidth(column, baseWidth) {
     var sumRatioWidth = 0;
