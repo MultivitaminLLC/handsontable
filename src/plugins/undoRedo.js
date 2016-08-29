@@ -215,7 +215,7 @@
   };
   Handsontable.UndoRedo.CreateRowAction.prototype.redo = function (instance, redoneCallback) {
     instance.addHookOnce('afterCreateRow', redoneCallback);
-    instance.alter('insert_row', this.index + 1, this.amount);
+    instance.alter('insert_row', this.index, this.amount);
   };
 
   Handsontable.UndoRedo.RemoveRowAction = function (index, data) {
@@ -248,7 +248,7 @@
   };
   Handsontable.UndoRedo.CreateColumnAction.prototype.redo = function (instance, redoneCallback) {
     instance.addHookOnce('afterCreateCol', redoneCallback);
-    instance.alter('insert_col', this.index + 1, this.amount);
+    instance.alter('insert_col', this.index, this.amount);
   };
 
   Handsontable.UndoRedo.CellAlignmentAction = function (stateBefore, range, type, alignment) {

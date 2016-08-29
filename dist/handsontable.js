@@ -7,7 +7,7 @@
  * Licensed under the MIT license.
  * http://handsontable.com/
  *
- * Date: Tue Aug 23 2016 14:46:01 GMT+0500 (YEKT)
+ * Date: Mon Aug 29 2016 17:23:23 GMT+0500 (YEKT)
  */
 /*jslint white: true, browser: true, plusplus: true, indent: 4, maxerr: 50 */
 
@@ -14230,7 +14230,7 @@ function Storage(prefix) {
   };
   Handsontable.UndoRedo.CreateRowAction.prototype.redo = function (instance, redoneCallback) {
     instance.addHookOnce('afterCreateRow', redoneCallback);
-    instance.alter('insert_row', this.index + 1, this.amount);
+    instance.alter('insert_row', this.index, this.amount);
   };
 
   Handsontable.UndoRedo.RemoveRowAction = function (index, data) {
@@ -14263,7 +14263,7 @@ function Storage(prefix) {
   };
   Handsontable.UndoRedo.CreateColumnAction.prototype.redo = function (instance, redoneCallback) {
     instance.addHookOnce('afterCreateCol', redoneCallback);
-    instance.alter('insert_col', this.index + 1, this.amount);
+    instance.alter('insert_col', this.index, this.amount);
   };
 
   Handsontable.UndoRedo.CellAlignmentAction = function (stateBefore, range, type, alignment) {
