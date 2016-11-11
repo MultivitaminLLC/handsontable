@@ -211,9 +211,9 @@ function WalkontableEvent(instance) {
     });
   }
 
-  eventManager.addEventListener(window, 'resize', function () {
-    that.instance.draw();
-  });
+  // eventManager.addEventListener(window, 'resize', function () {
+  //   that.instance.draw();
+  // });
 
   this.destroy = function () {
     clearTimeout(this.dblClickTimeout[0]);

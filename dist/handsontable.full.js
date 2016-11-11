@@ -7,7 +7,7 @@
  * Licensed under the MIT license.
  * http://handsontable.com/
  *
- * Date: Mon Aug 29 2016 17:23:23 GMT+0500 (YEKT)
+ * Date: Fri Nov 11 2016 13:50:34 GMT+0500 (+05)
  */
 /*jslint white: true, browser: true, plusplus: true, indent: 4, maxerr: 50 */
 
@@ -20227,9 +20227,9 @@ function WalkontableEvent(instance) {
     });
   }
 
-  eventManager.addEventListener(window, 'resize', function () {
-    that.instance.draw();
-  });
+  // eventManager.addEventListener(window, 'resize', function () {
+  //   that.instance.draw();
+  // });
 
   this.destroy = function () {
     clearTimeout(this.dblClickTimeout[0]);
